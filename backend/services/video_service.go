@@ -10,6 +10,7 @@ import (
 
 	"github.com/arifazola/nontoon/constants"
 	"github.com/arifazola/nontoon/interfaces"
+	"github.com/arifazola/nontoon/internal/db"
 	"github.com/arifazola/nontoon/models"
 	"github.com/google/uuid"
 )
@@ -96,4 +97,15 @@ func (videoService *VideoService) MergeChunks(uploadId, filename string, totalCh
 	}
 
 	return "", nil
+}
+
+func (service *VideoService) GetLatestUploadedChunk(ctx context.Context, uploadId string) (db.VideoJob, error){
+	latestChunk, err := service.VideoJobs.GetLatestUploadedChunk(ctx, uploadId)
+
+	if err != nil {
+		var videoJob db.VideoJob
+		return videoJob, err
+	}
+
+	return latestChunk, nil
 }

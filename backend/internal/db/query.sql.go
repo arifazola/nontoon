@@ -57,3 +57,18 @@ func (q *Queries) GetAllVideoJobs(ctx context.Context) ([]VideoJob, error) {
 	}
 	return items, nil
 }
+
+const getLatestUploadedChunk = `-- name: GetLatestUploadedChunk :one
+SELECT id, "uploadId", index 
+FROM public."VideoJobs" 
+WHERE "uploadId" = $1
+ORDER BY index DESC
+LIMIT 1
+`
+
+func (q *Queries) GetLatestUploadedChunk(ctx context.Context, uploadid string) (VideoJob, error) {
+	row := q.db.QueryRowContext(ctx, getLatestUploadedChunk, uploadid)
+	var i VideoJob
+	err := row.Scan(&i.ID, &i.UploadId, &i.Index)
+	return i, err
+}

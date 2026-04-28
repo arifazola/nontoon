@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import './App.css'
 
 function App() {
 
+  const [totalChunks, setTotalChunks] = useState(0)
+  const [totalChunksUploaded, setTotalChunksUploaded] = useState(0)
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0]
@@ -23,6 +26,7 @@ function App() {
         })
 
         const res = await response.json()
+        setTotalChunksUploaded(i)
         console.log("result api", res)
       }
     }
@@ -41,11 +45,16 @@ function App() {
       const chunk = file.slice(start, start + chunkSize);
       chunks.push(chunk);
     }
+    setTotalChunks(chunks.length)
     return chunks;
   };
   return (
     <>
       <input type='file' onChange={(e) => handleInputChange(e)}></input>
+
+      <br />
+
+      <p>Total chunks uploaded: {totalChunksUploaded} out of {totalChunks}</p>
     </>
   )
 }

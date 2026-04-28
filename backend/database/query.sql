@@ -9,3 +9,10 @@ SELECT id, "uploadId", index
 INSERT INTO public."VideoJobs"(
 	id, "uploadId", index)
 	VALUES ($1, $2, $3);
+
+-- name: GetLatestUploadedChunk :one
+SELECT id, "uploadId", index 
+FROM public."VideoJobs" 
+WHERE "uploadId" = $1
+ORDER BY index DESC
+LIMIT 1;

@@ -43,6 +43,10 @@ func main(){
 	videoController := controllers.VideoController{
 		VideoService: &videoService,
 	}
+
+	chunkController := controllers.ChunkController {
+		VideoService: &videoService,
+	}
 	
 	router.GET("/videos", controllers.GetAllVideos)
 
@@ -51,6 +55,8 @@ func main(){
 	router.POST("/videos/chunks", videoController.UploadChunk)
 
 	router.POST("/videos/merge", videoController.CompleteUpload)
+
+	router.GET("/chunks/:uploadId", chunkController.GetLatestUploadedChunk)
 
 	router.Run("localhost:8080")
 }

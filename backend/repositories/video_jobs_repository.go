@@ -27,3 +27,14 @@ func (repo *VideoJobsRepository) AddVideoJobs(context context.Context, id, uploa
 		Index: index32,
 	})
 }
+
+func (repo *VideoJobsRepository) GetLatestUploadedChunk(ctx context.Context, uploadId string) (db.VideoJob, error) {
+	latestChunk, err := repo.Queries.GetLatestUploadedChunk(ctx, uploadId)
+
+	var videoJob db.VideoJob
+	if err != nil {
+		return videoJob, err
+	}
+
+	return latestChunk, nil
+}
