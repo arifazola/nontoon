@@ -1,18 +1,20 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/arifazola/nontoon/controllers"
+	"github.com/arifazola/nontoon/database"
 	"github.com/arifazola/nontoon/repositories"
 	"github.com/arifazola/nontoon/services"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 func main(){
-	fmt.Println("Start");
 	router := gin.Default()
 	router.Use(cors.Default())
+
+	databaseUrl := "postgres://postgres:test1234@localhost:5432/nontoon?sslmode=disable"
+
+	database.NewDB(databaseUrl)
 
 	localStorage := repositories.LocalStorage{
 		BasePath: "./files",
