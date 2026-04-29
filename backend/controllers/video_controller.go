@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/arifazola/nontoon/constants"
 	"github.com/arifazola/nontoon/services"
 	"github.com/gin-gonic/gin"
 )
@@ -75,7 +76,7 @@ func (c *VideoController) CompleteUpload(ctx *gin.Context) {
 
     totalChunks, _ := strconv.Atoi(totalChunksStr)
 
-    path, err := c.VideoService.MergeChunks(uploadID, filename, totalChunks)
+    path, err := c.VideoService.MergeChunks(uploadID, filename, totalChunks, constants.BASE_PATH)
     if err != nil {
         ctx.JSON(500, gin.H{"error": err.Error()})
         return

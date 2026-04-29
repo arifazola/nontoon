@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/arifazola/nontoon/constants"
 	"github.com/arifazola/nontoon/interfaces"
 	"github.com/arifazola/nontoon/internal/db"
 	"github.com/arifazola/nontoon/models"
@@ -60,43 +59,46 @@ func (videoService *VideoService) SaveChunk(uploadID string, index int, file io.
 	return nil
 }
 
-func (videoService *VideoService) MergeChunks(uploadId, filename string, totalChunks int) (string, error){
-	err := os.MkdirAll(constants.BASE_PATH, os.ModePerm)
+func (videoService *VideoService) MergeChunks(uploadId, filename string, totalChunks int, basepath string) (string, error){
+	err := os.MkdirAll(basepath, os.ModePerm)
 
 	if err != nil {
 		log.Println("error create dir: ", err)
 	}
 
-	finalPath := filepath.Join(constants.BASE_PATH, filename)
+	finalPath := filepath.Join(basepath, filename)
 
 
 	finalFile, err := os.Create(finalPath)
 
 	if err != nil {
 		log.Println("error creating final file: ", err)
+		return "", err
 	}
 
 	defer finalFile.Close()
 
 	for i := 0; i < totalChunks; i ++ {
-		chunkPath := filepath.Join(constants.BASE_PATH, uploadId, fmt.Sprintf("%d.part", i))
+		chunkPath := filepath.Join(basepath, uploadId, fmt.Sprintf("%d.part", i))
 
 		chunkFile, err := os.Open(chunkPath)
 
 		if err != nil {
 			log.Println("error opening chunk file: ", err)
+			return "", err
 		}
 
 		_, copyChunkErr := io.Copy(finalFile, chunkFile)
 
+		chunkFile.Close()
+
 		if copyChunkErr != nil {
 			log.Println("Error copying chunks: ", copyChunkErr)
+			return "", copyChunkErr
 		}
-
-		defer chunkFile.Close()
 	}
 
-	return "", nil
+	return finalPath, nil
 }
 
 func (service *VideoService) GetLatestUploadedChunk(ctx context.Context, uploadId string) (db.VideoJob, error){
