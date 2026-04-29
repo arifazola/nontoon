@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/arifazola/nontoon/controllers"
 	"github.com/arifazola/nontoon/database"
@@ -57,6 +58,8 @@ func main(){
 	router.POST("/videos/merge", videoController.CompleteUpload)
 
 	router.GET("/chunks/:uploadId", chunkController.GetLatestUploadedChunk)
+
+	router.StaticFS("/assets", http.Dir("./assets"))
 
 	router.Run("localhost:8080")
 }
