@@ -1,6 +1,5 @@
 import { MediaControlBar, MediaController, MediaFullscreenButton, MediaMuteButton, MediaPlaybackRateButton, MediaPlayButton, MediaSeekBackwardButton, MediaSeekForwardButton, MediaTimeDisplay, MediaTimeRange, MediaVolumeRange } from 'media-chrome/react'
 import { MediaRenditionMenu, MediaRenditionMenuButton } from 'media-chrome/react/menu'
-import React from 'react'
 import ReactPlayer from 'react-player'
 
 const Video = () => {
