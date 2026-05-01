@@ -7,6 +7,7 @@ function App() {
   const [totalChunks, setTotalChunks] = useState(0)
   const [totalChunksUploaded, setTotalChunksUploaded] = useState(0)
   const [videoId, setVideoId] = useState("")
+  const navigate = useNavigate()
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0]
@@ -74,7 +75,7 @@ function App() {
   };
 
   const navigateToVideoPage = () => {
-    const navigate = useNavigate()
+    console.log('edclic')
 
     navigate(`/video/${videoId}`)
   }
@@ -87,7 +88,7 @@ function App() {
       <p>Total chunks uploaded: {totalChunksUploaded} out of {totalChunks}</p>
 
       {videoId !== "" ? (
-        <p onClick={navigateToVideoPage}>Watch your video here</p>
+        <div onClick={navigateToVideoPage}>Watch your video here</div>
       ) : null}
     </>
   )
