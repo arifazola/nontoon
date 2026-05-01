@@ -60,14 +60,57 @@ func (videoService *VideoService) SaveChunk(uploadID string, index int, file io.
 	return nil
 }
 
-func (videoService *VideoService) MergeChunks(uploadId, filename string, totalChunks int, basepath string) (string, error){
+func (videoService *VideoService) CompleteUpload(uploadId, filename string, totalChunks int, basepath string) (string, error){
 	
-	finalPath, err := videoService.FileStorage.MergeChunks(uploadId, filename, totalChunks, basepath)
+	finalPath, err := videoService.MergeChunks(uploadId, filename, totalChunks, basepath)
 
 	if err != nil {
 		return  "", err
 	}
 
+	errMoveToAssetFolder := videoService.MoveFileToAssetsFolder(basepath, filename)
+
+	if errMoveToAssetFolder != nil {
+		return "", errMoveToAssetFolder
+	}
+
+	go func ()  {
+		errGenerateHls := videoService.GenerateHls(filename)
+
+		if errGenerateHls != nil {
+			log.Println("error generating hls: ", errGenerateHls)
+		}
+
+		videoService.DeleteTempFile(uploadId, filename)
+	}()
+
+	return finalPath, nil
+}
+
+func (service *VideoService) MergeChunks(uploadId, filename string, totalChunks int, basepath string) (string, error){
+	finalPath, err := service.FileStorage.MergeChunks(uploadId, filename, totalChunks, basepath)
+
+	if err != nil {
+		return  "", err
+	}
+
+	return finalPath, nil
+}
+
+func (service *VideoService) GenerateHls(filename string) error {
+	videoSrc := constants.ASSETS_PATH + "/" + filename
+	output := constants.ASSETS_PATH + "/def" + filename + ".m3u8"
+	errHls := service.VideoProcessor.CreateHlsFile(videoSrc, output, filename)
+
+	if errHls != nil {
+		log.Println("error hls result:", errHls)
+		return errHls
+	}
+
+	return nil
+}
+
+func (service *VideoService) MoveFileToAssetsFolder(basepath, filename string) error{
 	//Move the merged file to assets folder before being processed by ffmpeg
 	orgFile := basepath + "/" + filename
 	destinationFile := constants.ASSETS_PATH + "/" + filename
@@ -75,33 +118,26 @@ func (videoService *VideoService) MergeChunks(uploadId, filename string, totalCh
 
 	if movFileRrr != nil {
 		log.Println("move file error", movFileRrr)
-		return "", movFileRrr
+		return movFileRrr
 	}
 
-	go func ()  {
-		videoSrc := constants.ASSETS_PATH + "/" + filename
-		output := constants.ASSETS_PATH + "/def" + filename + ".m3u8"
-		errHls := videoService.VideoProcessor.CreateHlsFile(videoSrc, output, filename)
+	return nil
+}
 
-		if errHls != nil {
-			log.Println("error hls result:", errHls)
-		}
-		chunkPath := filepath.Join(constants.BASE_PATH, uploadId)
-		deleteChunkFileError := videoService.FileStorage.DeleteFile(chunkPath)
+func (service *VideoService) DeleteTempFile(uploadId, filename string){
+	chunkPath := filepath.Join(constants.BASE_PATH, uploadId)
+	deleteChunkFileError := service.FileStorage.DeleteFile(chunkPath)
 
-		if deleteChunkFileError != nil {
-			log.Println("error delete chunk path", deleteChunkFileError)
-		}
+	if deleteChunkFileError != nil {
+		log.Println("error delete chunk path", deleteChunkFileError)
+	}
 
-		tempAssetFile := filepath.Join(constants.ASSETS_PATH, filename)
-		deleteTempAssetErr := videoService.FileStorage.DeleteFile(tempAssetFile)
+	tempAssetFile := filepath.Join(constants.ASSETS_PATH, filename)
+	deleteTempAssetErr := service.FileStorage.DeleteFile(tempAssetFile)
 
-		if deleteTempAssetErr != nil {
-			log.Println("error delete chunk path", deleteChunkFileError)
-		}
-	}()
-
-	return finalPath, nil
+	if deleteTempAssetErr != nil {
+		log.Println("error delete chunk path", deleteChunkFileError)
+	}
 }
 
 func (service *VideoService) GetLatestUploadedChunk(ctx context.Context, uploadId string) (db.VideoJob, error){
