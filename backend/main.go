@@ -60,6 +60,8 @@ func main(){
 	
 	router.GET("/videos", controllers.GetAllVideos)
 
+	router.GET("/videos/:id", videoController.GetVideoStatus)
+
 	router.POST("/videos", videoController.UploadVideo)
 
 	router.POST("/videos/chunks", videoController.UploadChunk)

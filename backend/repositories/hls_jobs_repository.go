@@ -27,3 +27,9 @@ func (repo *HlsJobsRepository) UpdateJob(context context.Context, uploadId strin
 	}
 	return repo.Queries.UpdateHlsJobStatus(context, params)
 }
+
+func (repo *HlsJobsRepository) GetStatus(context context.Context, uploadId string) (bool, error){
+	status, err := repo.Queries.GetHlsStatusByUploadId(context, uploadId)
+	
+	return status, err
+}

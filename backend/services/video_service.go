@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -151,6 +152,16 @@ func (service *VideoService) DeleteTempFile(uploadId, filename string){
 	if deleteTempAssetErr != nil {
 		log.Println("error delete chunk path", deleteChunkFileError)
 	}
+}
+
+func (service *VideoService) GetVideoStatus(context context.Context, id string) bool {
+	isVideoReady, err := service.HlsJob.GetStatus(context, id)
+
+	if err != nil {
+		fmt.Println("Error getting hls status", err)
+	}
+
+	return isVideoReady
 }
 
 func (service *VideoService) GetLatestUploadedChunk(ctx context.Context, uploadId string) (db.VideoJob, error){

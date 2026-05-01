@@ -18,6 +18,19 @@ func GetAllVideos(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, services.GetAllVideos())
 }
 
+func (videoController *VideoController) GetVideoStatus(c *gin.Context){
+    uploadId := c.Param("id")
+
+    isVideoReady := videoController.VideoService.GetVideoStatus(c, uploadId)
+
+    if !isVideoReady {
+        c.JSON(http.StatusNotFound, gin.H{"status": isVideoReady})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"status": isVideoReady})
+}
+
 func (videoController *VideoController) UploadVideo(c *gin.Context){
 	fileHeader, err := c.FormFile("file")
 

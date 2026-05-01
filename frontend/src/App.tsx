@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import './App.css'
+import { useNavigate } from 'react-router'
 
 function App() {
 
   const [totalChunks, setTotalChunks] = useState(0)
   const [totalChunksUploaded, setTotalChunksUploaded] = useState(0)
+  const [videoId, setVideoId] = useState("")
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0]
@@ -43,10 +45,15 @@ function App() {
     formData.append("filename", fileName)
     formData.append("totalChunks", totalChunks.toString())
 
-    await fetch("http://localhost:8080/videos/merge", {
+    const result = await fetch("http://localhost:8080/videos/merge", {
       method: "POST",
       body: formData
     })
+
+    await result.json()
+
+    setVideoId(uploadId)
+
   }
 
   const blobToFile = (theBlob: Blob, fileName: string): File => {
@@ -65,6 +72,12 @@ function App() {
     setTotalChunks(chunks.length)
     return chunks;
   };
+
+  const navigateToVideoPage = () => {
+    const navigate = useNavigate()
+
+    navigate(`/video/${videoId}`)
+  }
   return (
     <>
       <input type='file' onChange={(e) => handleInputChange(e)}></input>
@@ -72,6 +85,10 @@ function App() {
       <br />
 
       <p>Total chunks uploaded: {totalChunksUploaded} out of {totalChunks}</p>
+
+      {videoId !== "" ? (
+        <p onClick={navigateToVideoPage}>Watch your video here</p>
+      ) : null}
     </>
   )
 }

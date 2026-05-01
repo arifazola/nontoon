@@ -25,3 +25,7 @@ INSERT INTO public."HlsJobs"(
 UPDATE public."HlsJobs"
 	SET status=$1
 	WHERE "uploadId"=$2;
+
+-- name: GetHlsStatusByUploadId :one
+SELECT status
+	FROM public."HlsJobs" WHERE "uploadId" = $1;

@@ -74,6 +74,18 @@ func (q *Queries) GetAllVideoJobs(ctx context.Context) ([]VideoJob, error) {
 	return items, nil
 }
 
+const getHlsStatusByUploadId = `-- name: GetHlsStatusByUploadId :one
+SELECT status
+	FROM public."HlsJobs" WHERE "uploadId" = $1
+`
+
+func (q *Queries) GetHlsStatusByUploadId(ctx context.Context, uploadid string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, getHlsStatusByUploadId, uploadid)
+	var status bool
+	err := row.Scan(&status)
+	return status, err
+}
+
 const getLatestUploadedChunk = `-- name: GetLatestUploadedChunk :one
 SELECT id, "uploadId", index 
 FROM public."VideoJobs" 
